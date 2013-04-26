@@ -9,12 +9,26 @@ var MobileOperator = {
     var iccInfo = mobileConnection.iccInfo;
     var operator = network.shortName || network.longName;
 
-    if (iccInfo.isDisplaySpnRequired && iccInfo.spn &&
-        !mobileConnection.voice.roaming) {
-      if (iccInfo.isDisplayNetworkNameRequired && operator !== iccInfo.spn) {
-        operator = operator + ' ' + iccInfo.spn;
-      } else {
-        operator = iccInfo.spn;
+    if (!mobileConnection.voice.roaming) {
+      // When not roaming, always show SPN if available.
+      if (iccInfo.isDisplaySpnRequired && iccInfo.spn) {
+        if (iccInfo.isDisplayNetworkNameRequired && operator !== iccInfo.spn) {
+          // Network is also shown if required.
+          operator = operator + ' ' + iccInfo.spn;
+        } else {
+          // If network name is not required, or if it's the same as the SPN
+          // then just the SPN.
+          operator = iccInfo.spn;
+        }
+      }
+    } else {
+      // When roaming, display network name should always be required
+      if (iccInfo.isDisplayNetworkNameRequired) {
+        if (iccInfo.isDisplaySpnRequired && iccInfo.spn &&
+            operator !== iccInfo.spn) {
+          // SPN name is also shown if required and available.
+          operator = operator + ' ' + iccInfo.spn;
+        }
       }
     }
 
